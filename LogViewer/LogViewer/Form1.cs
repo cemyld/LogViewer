@@ -12,7 +12,6 @@ namespace LogViewer
 {
     public partial class Form1 : Form
     {
-        string file_path;
         public Form1()
         {
             InitializeComponent();
@@ -22,32 +21,49 @@ namespace LogViewer
         {
             //System.Drawing.Icon ico = Properties.Resources.log_viewer;
             //this.Icon = ico;
+            
+
+            
+            //grid.ItemsSource = items;
+            //dataGridView1.DataSource = items;
+        }
+
+
+        private void openFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
             OpenFileDialog fDialog = new OpenFileDialog();
             fDialog.Title = "Select an XML File";
             fDialog.Filter = "XML File|*.xml";
             if (fDialog.ShowDialog() == DialogResult.OK)
             {
-                file_path = fDialog.FileName.ToString();
-            }
-            else
-            {
-                Application.Exit();
-            }
+                string file_path = fDialog.FileName.ToString();
+                openXmlFileOnTab(file_path);
 
-            var items = deserializeLog();
+            }
+            //var items = deserializeLog();
 
-            var grid = sender as DataGrid;
-            //grid.ItemsSource = items;
-            dataGridView1.DataSource = items;
+            //var grid = sender as DataGrid;
         }
-        public List<LogMessage> deserializeLog()
+        private void openXmlFileOnTab(string file_path)
         {
+            string file_name = Path.GetFileName(file_path);
+            //Read file
             XmlSerializer deserializer = new XmlSerializer(typeof(LogMessages));
             TextReader reader = new StreamReader(file_path);
+            //Create LogMessages object from xml
             object obj = deserializer.Deserialize(reader);
             LogMessages xmlData = (LogMessages)obj;
             reader.Close();
-            return xmlData.Items;
+            //Create datagridview
+            DataGridView datagrid = new DataGridView();
+            datagrid.Dock = DockStyle.Fill;
+            datagrid.DataSource = xmlData.Items;
+            //Create tabpage
+            TabPage filetab = new TabPage(file_name);
+            //Add datagridview
+            filetab.Controls.Add(datagrid);
+            //Add tabpage
+            tabControl1.Controls.Add(filetab);
         }
     }
     public class LogMessage
