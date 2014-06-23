@@ -4,9 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 
@@ -22,6 +20,8 @@ namespace LogViewer
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //System.Drawing.Icon ico = Properties.Resources.log_viewer;
+            //this.Icon = ico;
             OpenFileDialog fDialog = new OpenFileDialog();
             fDialog.Title = "Select an XML File";
             fDialog.Filter = "XML File|*.xml";
