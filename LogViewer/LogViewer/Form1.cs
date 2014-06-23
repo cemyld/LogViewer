@@ -12,6 +12,7 @@ namespace LogViewer
 {
     public partial class Form1 : Form
     {
+        
         private int mActiveTab = -1;
 
         public Form1()
@@ -21,12 +22,7 @@ namespace LogViewer
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //System.Drawing.Icon ico = Properties.Resources.log_viewer;
-            //this.Icon = ico;
 
-
-            //grid.ItemsSource = items;
-            //dataGridView1.DataSource = items;
         }
 
 
@@ -55,9 +51,24 @@ namespace LogViewer
             object obj = deserializer.Deserialize(reader);
             LogMessages xmlData = (LogMessages)obj;
             reader.Close();
+            //Create DataTable
+            DataTable table = new DataTable();
+            table.Columns.Add("Date");
+            table.Columns.Add("Type");
+            table.Columns.Add("Message");
+            foreach (var item in xmlData.Items)
+            {
+                var row = table.NewRow();
+
+                row["Date"] = item.Date;
+                row["Type"] = item.Type;
+                row["Message"] = item.Message;
+
+                table.Rows.Add(row);
+            }
             //Create bindingsource
             BindingSource bn = new BindingSource();
-            bn.DataSource = xmlData.Items;
+            bn.DataSource = table;
             //Create columns
             DataGridViewTextBoxColumn datecolumn = new DataGridViewTextBoxColumn();
             datecolumn.Name = "Date";
