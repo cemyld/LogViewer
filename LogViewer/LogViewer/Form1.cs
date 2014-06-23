@@ -12,6 +12,8 @@ namespace LogViewer
 {
     public partial class Form1 : Form
     {
+        private int mActiveTab = -1;
+
         public Form1()
         {
             InitializeComponent();
@@ -21,12 +23,10 @@ namespace LogViewer
         {
             //System.Drawing.Icon ico = Properties.Resources.log_viewer;
             //this.Icon = ico;
-            
 
-            
+
             //grid.ItemsSource = items;
             //dataGridView1.DataSource = items;
-            tabControl1.DrawMode = TabDrawMode.OwnerDrawFixed;
         }
 
 
@@ -96,33 +96,61 @@ namespace LogViewer
             tabControl1.Controls.Add(filetab);
         }
 
-        private void tabControl1_DrawItem(object sender, DrawItemEventArgs e)
-        {
-            //This code will render a "x" mark at the end of the Tab caption. 
-            e.Graphics.DrawString("x", e.Font, Brushes.Black, e.Bounds.Right - 15, e.Bounds.Top + 4);
-            e.Graphics.DrawString(this.tabControl1.TabPages[e.Index].Text, e.Font, Brushes.Black, e.Bounds.Left + 12, e.Bounds.Top + 4);
-            e.DrawFocusRectangle();
-        }
 
         private void tabControl1_MouseDown(object sender, MouseEventArgs e)
         {
-            //Looping through the controls.
-            for (int i = 0; i < this.tabControl1.TabPages.Count; i++)
+            if (e.Button == System.Windows.Forms.MouseButtons.Right)
             {
-                Rectangle r = tabControl1.GetTabRect(i);
-                //Getting the position of the "x" mark.
-                Rectangle closeButton = new Rectangle(r.Right - 15, r.Top + 4, 9, 7);
-                if (closeButton.Contains(e.Location))
+                for (int i = 0; i < tabControl1.TabCount; ++i)
                 {
-                    if (MessageBox.Show("Would you like to Close this Tab?", "Confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    Rectangle r = tabControl1.GetTabRect(i);
+                    if (r.Contains(e.Location) /* && it is the header that was clicked*/)
                     {
-                        this.tabControl1.TabPages.RemoveAt(i);
+                        // update active tab
+                        mActiveTab = i;
+
+                        // Change slected index, get the page, create contextual menu
+                        ContextMenu cm = new ContextMenu();
+                        // Add several items to menu
+                        MenuItem closeitem = new MenuItem("Close", new EventHandler(CloseItem_Click));
+                        //closeitem.Click += new EventHandler(CloseItem_Click);
+                        
+                        cm.MenuItems.Add(closeitem);
+
+                        cm.Show(this, e.Location);
                         break;
                     }
                 }
             }
+            base.OnMouseUp(e);
         }
 
+        private void CloseItem_Click(object sender, EventArgs e)
+        {
+            if (mActiveTab != -1)
+            {
+                this.tabControl1.TabPages.RemoveAt(mActiveTab);
+            }
+        }
+
+        private void openFolderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog folderBrowserDialog1 = new FolderBrowserDialog();
+            folderBrowserDialog1.ShowNewFolderButton = false;
+            folderBrowserDialog1.Description =
+            "Select a Source Folder for XML Files";
+            //folderBrowserDialog1.RootFolder = Environment.SpecialFolder.Personal;
+            DialogResult result = folderBrowserDialog1.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                string destpath = folderBrowserDialog1.SelectedPath;
+                foreach (string filedir in Directory.GetFiles(destpath, "*.xml", SearchOption.AllDirectories))
+                {
+                    openXmlFileOnTab(filedir);
+                }
+            }
+        }
+    }
         
 
     }
@@ -139,5 +167,5 @@ namespace LogViewer
         public List<LogMessage> Items { get; set; }
     }
 
-}
+
 
