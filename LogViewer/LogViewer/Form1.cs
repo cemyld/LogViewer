@@ -10,19 +10,18 @@ using System.Xml.Serialization;
 
 namespace LogViewer
 {
-    public partial class Form1 : Form
+    public partial class FrmLogViewer : Form
     {
-        
         private int mActiveTab = -1;
 
-        public Form1()
+        public FrmLogViewer()
         {
             InitializeComponent();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            cmbLogType.SelectedItem = cmbLogType.Items[0];
         }
 
 
@@ -37,9 +36,6 @@ namespace LogViewer
                 openXmlFileOnTab(file_path);
 
             }
-            //var items = deserializeLog();
-
-            //var grid = sender as DataGrid;
         }
         private void openXmlFileOnTab(string file_path)
         {
@@ -90,6 +86,9 @@ namespace LogViewer
             //Create datagridview
             DataGridView datagrid = new DataGridView();
             datagrid.AutoGenerateColumns = false;
+            datagrid.EditMode = DataGridViewEditMode.EditProgrammatically;
+            datagrid.ReadOnly = true;
+            
             //Add columns
             datagrid.Columns.Add(datecolumn);
             datagrid.Columns.Add(typecolumn);
@@ -97,6 +96,7 @@ namespace LogViewer
             //Set datagridview properties
             datagrid.DataSource = bn;
             datagrid.Dock = DockStyle.Fill;
+            datagrid.AllowUserToAddRows = false;
             //datagrid.AutoSizeColumnsMode= DataGridViewAutoSizeColumnsMode.Fill;
             //
             //Create tabpage
@@ -104,17 +104,17 @@ namespace LogViewer
             //Add datagridview
             filetab.Controls.Add(datagrid);
             //Add tabpage
-            tabControl1.Controls.Add(filetab);
+            tabControlFiles.Controls.Add(filetab);
         }
 
-
+      
         private void tabControl1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Right)
             {
-                for (int i = 0; i < tabControl1.TabCount; ++i)
+                for (int i = 0; i < tabControlFiles.TabCount; ++i)
                 {
-                    Rectangle r = tabControl1.GetTabRect(i);
+                    Rectangle r = tabControlFiles.GetTabRect(i);
                     if (r.Contains(e.Location) /* && it is the header that was clicked*/)
                     {
                         // update active tab
@@ -140,7 +140,7 @@ namespace LogViewer
         {
             if (mActiveTab != -1)
             {
-                this.tabControl1.TabPages.RemoveAt(mActiveTab);
+                this.tabControlFiles.TabPages.RemoveAt(mActiveTab);
             }
         }
 
@@ -160,6 +160,38 @@ namespace LogViewer
                     openXmlFileOnTab(filedir);
                 }
             }
+        }
+
+        private void btnFilter_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string filter = "";
+                string startDate = dtpStartTime.Value.ToString("yyyy-MM-dd HH:mm") + ":00,000";
+                string endDate = dtpEndTime.Value.ToString("yyyy-MM-dd HH:mm") + ":00,000";
+                string typefilter = (string)cmbLogType.SelectedItem;
+                BindingSource bn = (BindingSource)((DataGridView)tabControlFiles.SelectedTab.Controls[0]).DataSource;
+                if (dtpStartTime.Checked) { filter += "DATE >= '" + startDate + "'"; }
+                if (dtpEndTime.Checked) { if (filter != "") { filter += " AND "; } filter += "DATE <= '" + endDate + "'"; }
+                if (typefilter != "ALL") { if (filter != "") { filter += " AND "; } filter += "TYPE = '" + typefilter + "'"; }
+
+                bn.Filter = filter;
+            }
+            catch { }
+            
+        }
+
+        private void btnClear_Click(object sender, EventArgs e)
+        {
+            dtpStartTime.Checked = false;
+            dtpEndTime.Checked = false;
+            cmbLogType.SelectedItem = cmbLogType.Items[0];
+            try
+            {
+                BindingSource bn = (BindingSource)((DataGridView)tabControlFiles.SelectedTab.Controls[0]).DataSource;
+                bn.Filter = "";
+            }
+            catch { }
         }
     }
         
