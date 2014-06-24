@@ -58,7 +58,7 @@ namespace LogViewer
 
                 row["Date"] = item.Date;
                 row["Type"] = item.Type;
-                row["Message"] = item.Message;
+                row["Message"] = item.Message.Replace("\n", System.Environment.NewLine);
 
                 table.Rows.Add(row);
             }
@@ -82,13 +82,13 @@ namespace LogViewer
             messagecolumn.Name = "Message";
             messagecolumn.DataPropertyName = "Message";
             messagecolumn.ReadOnly = true;
-            messagecolumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            messagecolumn.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+            messagecolumn.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
             //Create datagridview
             DataGridView datagrid = new DataGridView();
             datagrid.AutoGenerateColumns = false;
             datagrid.EditMode = DataGridViewEditMode.EditProgrammatically;
             datagrid.ReadOnly = true;
-            
             //Add columns
             datagrid.Columns.Add(datecolumn);
             datagrid.Columns.Add(typecolumn);
@@ -97,7 +97,7 @@ namespace LogViewer
             datagrid.DataSource = bn;
             datagrid.Dock = DockStyle.Fill;
             datagrid.AllowUserToAddRows = false;
-            //datagrid.AutoSizeColumnsMode= DataGridViewAutoSizeColumnsMode.Fill;
+            datagrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             //
             //Create tabpage
             TabPage filetab = new TabPage(file_name);
